@@ -1,0 +1,13 @@
+{
+    "name": "sameproject/test",
+    "description": "Example Composer Initial file",
+    "type": "project",
+    "require": {
+        "rivsen/hello-world": "^0.1.0"
+    },
+    "license": "MIT",
+    "authors": [{
+        "name": "Vasilii Borisov",
+        "email": "obi@yuhen.ru"
+    }]
+}

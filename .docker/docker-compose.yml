@@ -1,0 +1,50 @@
+version: "3.7"
+
+networks:
+  backend:
+    driver: ${NETWORKS_DRIVER}
+
+services:
+  backend:
+    container_name: ${COMPOSE_PROJECT_NAME}_backend
+    env_file: .env
+    build: 
+      context: .
+      dockerfile: ./backend/Dockerfile
+      args:
+      - PHP_VERSION=${PHP_VERSION}
+      - NGINX_ROOT=${NGINX_ROOT}
+      - APP_HOST=${APP_HOST}
+      - APP_CODE_PATH_CONTAINER=${APP_CODE_PATH_CONTAINER}
+      - TIMEZONE=${TIMEZONE}
+      - APP_USER=${APP_USER}
+      - APP_GROUP=${APP_GROUP}
+      - NGINX_HOST_HTTP_PORT=${NGINX_HOST_HTTP_PORT}
+    ports:
+      - "${NGINX_HOST_HTTP_PORT}:80"
+      - "${BACKEND_HOST_SSH_PORT}:22"
+    depends_on:
+      - db
+    links:
+      - db
+    volumes:
+      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}:cached
+    restart: always
+    networks:
+      backend:
+        aliases:
+          - ${APP_HOST}
+
+  db:
+    env_file: .env
+    container_name: ${COMPOSE_PROJECT_NAME}_db
+    image: mysql:5.7
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db/initial:/docker-entrypoint-initdb.d:ro
+      - ./db/mysql:/var/lib/mysql
+    networks:
+      - backend
+    command: ["mysqld", "--user=mysql", "--lower_case_table_names=1"]
+    restart: on-failure
